@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <title>VimeTop Group Stats</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous">
+</head>
+
+<body>
+	<div class="container-fluid">
+		<div class="row">
+			<div class="col-md-8 offset-md-2">
+				<h4><a target="_blank" href="https://vk.com/vimetop">Статистика агентов группы VimeTop</a></h4>
+				<div id="widget-notify"></div>
+				
+				<div class="form-group">
+					ID агента: <input id="agent" type="number" min="0" value="0" class="form-control" placeholder="0 - все"></input>
+					За последние n-минут: <input type="number" min="10" value="10" id="min" class="form-control"></input>
+						<a href="#" onclick="$('#min').val(10);">10 минут</a> | 
+						<a href="#" onclick="$('#min').val(30);">30 минут</a> | 
+						<a href="#" onclick="$('#min').val(60);">60 минут</a> | 
+						<a href="#" onclick="$('#min').val(60*12);">12 часов</a> | 
+						<a href="#" onclick="$('#min').val(60*24);">1 день</a> | 
+						<a href="#" onclick="$('#min').val(60*24*7);">7 дней</a> | 
+						<a href="#" onclick="$('#min').val(60*24*14);">14 дней</a> | 
+						<a href="#" onclick="$('#min').val(60*24*21);">21 день</a> |
+						<a href="#" onclick="$('#min').val(60*24*30);">30 дней</a>
+				</div>
+				
+				<div class="form-group">
+					<button id="button-perm" class="btn btn-success btn-block" type="button" onClick="sendRequest()">Отправить</button>
+				</div>
+			
+				<table id="resTable" class="table table-hover">
+					<thead>
+						<tr>
+							<th scope="col">#</th>
+							<th scope="col">Агент</th>
+							<th scope="col">Отправлено всего за всё время</th>
+							<th scope="col">Отправлено всего за период</th>
+							<th scope="col">Уник. юзерам за период</th>
+						</tr>
+					</thead>
+					<tbody></tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+	
+		
+	<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js" integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T" crossorigin="anonymous"></script>
+	
+	<script type="text/javascript">
+		function showAlert(header, text, type = 'warning') {
+			$('#widget-notify').append(
+				'<div class="alert alert-dismissible alert-' + type + '" role="alert">' +
+					'<h4 class="alert-heading">' + header + '</h4>' +
+					text +
+					'<button type="button" class="close" data-dismiss="alert" aria-label="Закрыть">' +
+						'<span aria-hidden="true">&times;</span>' +
+					'</button>' +
+				'</div>'
+			);
+		}
+		function sendRequest() {
+			if($("#min").val() > 60*60*24*30) return showAlert("Ошибка", "Время не может быть больше 1 месяца", "danger");
+			$.ajax({
+				url: "/admin/ajax/get",
+				type: "POST",
+				data: {
+					agent: $("#agent").val(),
+					min: $("#min").val(),
+				},
+				success: function(data) {
+					if(data.status == true) {
+						showAlert("Успешно", data.msg, "success");
+						$("#resTable tbody").html("");
+						var cnt = 0;
+						for(var i in data.response) {
+							$("#resTable tbody").append(
+								"<tr>" +
+									"<th>" + (++cnt) + "</th>" +
+									"<th><a target=\"_blank\" href=\"https://vk.com/id" + i + "\">" + i + "</a></th>" +
+									"<th>" + data.response[i].all + "</th>" +
+									"<th>" + data.response[i].send + "</th>" +
+									"<th>" + data.response[i].unique + "</th>" +
+								"</tr>"
+							);
+						}
+					}
+					else showAlert("Ошибка", data.msg, "danger");
+				}
+			});
+		}
+	</script>
+</body>
+</html>
