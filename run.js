@@ -110,7 +110,7 @@ function onHook(data) {
 	}
 }
 
-// Раз в час будут проверятся и удаляться старые сообщения с базы
+// Раз в час будут проверяться и удаляться старые сообщения с базы
 setInterval(function() {
 	for(var agent in db.agents) {
 		for(var i in db.agents[agent].msgs) {
